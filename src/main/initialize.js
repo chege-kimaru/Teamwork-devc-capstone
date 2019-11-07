@@ -1,6 +1,7 @@
 import config from 'dotenv';
 import db from './utils/db';
 import Logger from './utils/logger';
+import AuthService from './services/AuthService';
 
 const logger = new Logger().logger();
 
@@ -11,6 +12,6 @@ db.destroy()
     logger.info('Dropped tables');
     db.initialize().then(() => {
       logger.info('Created tables');
-      // TODO: initialize admin
-    });
+      AuthService.initiateAdmin().then(() => logger.info('Initialized admin')).catch((err) => logger.error(err));
+    }).catch((err) => logger.error(err));
   });
