@@ -25,7 +25,7 @@ class EmployeeController {
         address: req.body.address,
       };
       const resData = await EmployeeService.createEmployee(data);
-      Send.success(res, 200, resData);
+      Send.success(res, 201, resData);
     } catch (err) {
       Send.error(res, err);
     }

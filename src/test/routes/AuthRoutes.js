@@ -13,7 +13,7 @@ const test = () => {
     before(async () => {
       await db.destroy();
       await db.initialize();
-      await AuthService.initiateAdmin();
+      await AuthService.initializeAdmin();
     });
 
     it('should sign in a user with correct credentials', (done) => {

@@ -18,7 +18,7 @@ const test = () => {
     // eslint-disable-next-line no-undef
     it('should create default admin', async () => {
       try {
-        const data = await AuthService.initiateAdmin();
+        const data = await AuthService.initializeAdmin();
         expect(data.rows).to.be.an('array');
         expect(data.rows[0]).to.include({
           email: 'admin@teamwork.com',

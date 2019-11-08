@@ -22,7 +22,7 @@ class Send {
       res.status(401).json({ error: err.message, status: 'error' });
     } else {
       res.status(500).json({
-        error: process.env.NODE_ENV === 'development' ? err.message : 'Internal Server Error',
+        error: process.env.NODE_ENV === 'production' ? 'Internal Server Error' : err.message,
         status: 'error',
       });
     }

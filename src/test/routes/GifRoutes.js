@@ -4,26 +4,12 @@ import 'chai/register-should';
 import app from '../../main/app';
 import db from '../../main/utils/db';
 import AuthService from '../../main/services/AuthService';
-import EmployeeService from '../../main/services/EmployeeService';
+import GifService from '../../main/services/GifService';
+import EmployeeService from "../../main/services/EmployeeService";
 
 
 chai.use(chatHttp);
 const { expect } = chai;
-
-const EMPLOYEE = {
-  email: 'employee@teamwork.com',
-  firstName: 'john',
-  lastName: 'doe',
-  gender: 'MALE',
-  jobRole: 'CTO',
-  department: 'IT',
-  address: '300 Nairobi',
-};
-
-const ADMIN_CREDS = {
-  email: 'admin@teamwork.com',
-  password: '1234',
-};
 
 const EMPLOYEE1_CREDS = {
   email: 'employee1@teamwork.com',
@@ -36,7 +22,7 @@ const EMPLOYEE2_CREDS = {
 };
 
 const test = () => {
-  describe('EmployeeRoutes', () => {
+  describe('GifRoutes', () => {
     before(async () => {
       await db.destroy();
       await db.initialize();
@@ -44,41 +30,39 @@ const test = () => {
       await EmployeeService.initializeEmployees();
     });
 
-    it('Should let admin create a new employee', (done) => {
+    it('Should let employee create a gif', (done) => {
       chai.request(app)
         .post('/api/v1/auth/signin')
         .set('Accept', 'application/json')
-        .send(ADMIN_CREDS)
+        .send(EMPLOYEE1_CREDS)
         .end((err, res) => {
           const { token } = res.body.data;
           chai.request(app)
-            .post('/api/v1/employees')
-            .set('Accept', 'application/json')
+            .post('/api/v1/gifs')
+            .set('Accept', 'multipart/form-data')
             .set('token', token)
-            .send(EMPLOYEE)
+            .field('title', 'balloons')
+            .attach('image', './testImage.jpg')
             .end((err2, res2) => {
               expect(res2.status).to.equal(201);
-              expect(res.body.data).to.haveOwnProperty('id');
+              expect(res2.body.data).to.haveOwnProperty('imageurl');
               done();
             });
         });
     });
 
-    it('Should not allow incomplete details for employee', (done) => {
-      const data = { ...EMPLOYEE };
-      delete data.firstName;
-      delete data.lastName;
+    it('Should not allow a gif without an image to be created', (done) => {
       chai.request(app)
         .post('/api/v1/auth/signin')
         .set('Accept', 'application/json')
-        .send(ADMIN_CREDS)
+        .send(EMPLOYEE1_CREDS)
         .end((err, res) => {
           const { token } = res.body.data;
           chai.request(app)
-            .post('/api/v1/employees')
-            .set('Accept', 'application/json')
+            .post('/api/v1/gifs')
+            .set('Accept', 'multipart/form-data')
             .set('token', token)
-            .send(data)
+            .field('title', 'balloons')
             .end((err2, res2) => {
               expect(res2.status).to.equal(400);
               expect(res2.body).to.haveOwnProperty('error');
@@ -87,7 +71,20 @@ const test = () => {
         });
     });
 
-    it('Should not allow non-admin create a new employee', (done) => {
+    it('Should not allow an unauthenticated employee to create a gif', (done) => {
+      chai.request(app)
+        .post('/api/v1/gifs')
+        .set('Accept', 'multipart/form-data')
+        .field('title', 'balloons')
+        .attach('image', './testImage.jpg')
+        .end((err, res) => {
+          expect(res.status).to.equal(401);
+          expect(res.body).to.haveOwnProperty('error');
+          done();
+        });
+    });
+
+    it('Should get specific employees gifs', (done) => {
       chai.request(app)
         .post('/api/v1/auth/signin')
         .set('Accept', 'application/json')
@@ -95,13 +92,13 @@ const test = () => {
         .end((err, res) => {
           const { token } = res.body.data;
           chai.request(app)
-            .post('/api/v1/employees')
-            .set('Accept', 'application/json')
+            .get('/api/v1/gifs/employee/2')
+            .set('Accept', 'multipart/form-data')
             .set('token', token)
-            .send(EMPLOYEE)
-            .end((err, res) => {
-              expect(res.status).to.equal(401);
-              expect(res.body).to.haveOwnProperty('error');
+            .end((err2, res2) => {
+              expect(res2.status).to.equal(200);
+              expect(res2.body.data).to.be.an('array');
+              expect(res2.body.data[0]).to.haveOwnProperty('imageurl');
               done();
             });
         });

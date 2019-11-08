@@ -5,7 +5,7 @@ import ReqValidator from '../utils/validator';
 class GifController {
   static async createGif(req, res) {
     try {
-      req.body.imageUrl = req.file.secure_url;
+      req.body.imageUrl = req.file && req.file.secure_url;
       const valid = await ReqValidator.validate(req, res, {
         title: 'required',
         imageUrl: 'required',
@@ -25,7 +25,7 @@ class GifController {
   static async getEmployeeGifs(req, res) {
     try {
       const resData = await GifService.getEmployeeGifs(req.params.employeeId);
-      Send.success(res, 201, resData);
+      Send.success(res, 200, resData);
     } catch (err) {
       Send.error(res, err);
     }

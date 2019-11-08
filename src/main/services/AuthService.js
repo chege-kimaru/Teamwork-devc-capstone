@@ -8,13 +8,13 @@ const {pool} = db;
 const SALT = 10;
 
 class AuthService {
-  static async initiateAdmin() {
+  static async initializeAdmin() {
     try {
-      const query = 'INSERT INTO users (email, password, role) VALUES ($1, $2, $3) RETURNING *';
-      const pass = await bcrypt.hash('1234', SALT);
-      const values = ['admin@teamwork.com', pass, 1];
-      return pool.query(query, values);
-    } catch (err) {
+      const adminQuery = 'INSERT INTO users (email, password, role) VALUES ($1, $2, $3) RETURNING *';
+      const adminPass = await bcrypt.hash('1234', SALT);
+      const adminValues = ['admin@teamwork.com', adminPass, 1];
+      await pool.query(adminQuery, adminValues);
+    }catch(err) {
       throw err;
     }
   }
