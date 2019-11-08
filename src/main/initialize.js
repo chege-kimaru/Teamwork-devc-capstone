@@ -12,6 +12,6 @@ db.destroy()
     logger.info('Dropped tables');
     db.initialize().then(() => {
       logger.info('Created tables');
-      AuthService.initiateAdmin().then(() => logger.info('Initialized admin')).catch((err) => logger.error(err));
+      AuthService.initializeAdmin().then(() => logger.info('Initialized admin')).catch((err) => logger.error(err));
     }).catch((err) => logger.error(err));
   });

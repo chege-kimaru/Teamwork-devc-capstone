@@ -1,13 +1,34 @@
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import db from '../utils/db';
-import { ResourceNotFoundError, OperationNotAllowedError } from '../utils/errors';
+import {ResourceNotFoundError, OperationNotAllowedError} from '../utils/errors';
 
-const { pool } = db;
+const {pool} = db;
 
 const SALT = 10;
 
 class EmployeeService {
+  static async initializeEmployees() {
+    try {
+      const EMPLOYEE = {
+        email: 'employee1@teamwork.com',
+        firstName: 'john',
+        lastName: 'doe',
+        gender: 'MALE',
+        jobRole: 'CTO',
+        department: 'IT',
+        address: '300 Nairobi',
+      };
+
+      await this.createEmployee(EMPLOYEE);
+      EMPLOYEE.email = 'employee2@teamwork.com';
+      await this.createEmployee(EMPLOYEE);
+    } catch (err) {
+      throw err;
+    }
+  }
+
+
   static async createEmployee(employee) {
     const client = await pool.connect();
     try {
@@ -40,12 +61,16 @@ class EmployeeService {
   }
 
   static async findEmployeeById(id) {
-    const query = 'SELECT * FROM users, employees where users.id = employees.is AND employees.id=$1';
-    const resp = await pool.query(query, [id]);
-    const emp = resp.rows[0];
-    if (!emp) throw new ResourceNotFoundError('This user does not exist');
-    delete emp.password;
-    return emp;
+    try {
+      const query = 'SELECT * FROM users, employees where users.id = employees.is AND employees.id=$1';
+      const resp = await pool.query(query, [id]);
+      const emp = resp.rows[0];
+      if (!emp) throw new ResourceNotFoundError('This user does not exist');
+      delete emp.password;
+      return emp;
+    } catch (err) {
+      throw (err);
+    }
   }
 }
 
