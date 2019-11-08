@@ -25,7 +25,7 @@ class AuthService {
   }
 
   static async signIn(u) {
-    const query = 'SELECT id, email, password FROM users where email=$1';
+    const query = 'SELECT id, email, password, role FROM users where email=$1';
     const resp = await pool.query(query, [u.email]);
     const userData = resp.rows[0];
     if (!userData) throw new AuthenticationError();

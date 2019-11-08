@@ -9,10 +9,11 @@ import 'chai/register-should';
 
 import dbTests from './db';
 import servicesTests from './services';
+import routeTests from './routes';
 
 config.config();
 
 describe('Teamwork REST API Tests', () => {
   dbTests();
-  servicesTests();
+  routeTests();
 });
