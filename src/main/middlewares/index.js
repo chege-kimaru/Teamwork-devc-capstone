@@ -29,6 +29,10 @@ class Middlewares {
       }
     });
   }
+
+  static uploader(req, res, next) {
+
+  }
 }
 
 export default Middlewares;
