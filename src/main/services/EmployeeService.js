@@ -40,12 +40,16 @@ class EmployeeService {
   }
 
   static async findEmployeeById(id) {
-    const query = 'SELECT * FROM users, employees where users.id = employees.is AND employees.id=$1';
-    const resp = await pool.query(query, [id]);
-    const emp = resp.rows[0];
-    if (!emp) throw new ResourceNotFoundError('This user does not exist');
-    delete emp.password;
-    return emp;
+    try {
+      const query = 'SELECT * FROM users, employees where users.id = employees.is AND employees.id=$1';
+      const resp = await pool.query(query, [id]);
+      const emp = resp.rows[0];
+      if (!emp) throw new ResourceNotFoundError('This user does not exist');
+      delete emp.password;
+      return emp;
+    } catch (err) {
+      throw (err);
+    }
   }
 }
 
