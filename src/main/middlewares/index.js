@@ -18,12 +18,12 @@ class Middlewares {
   }
 
   static adminAuth(req, res, next) {
-    const [token] = req.headers;
+    const {token} = req.headers;
     jwt.verify(token, process.env.SECRET_KEY, async (err, decoded) => {
-      if (err || +decoded.role !== 2) return Send.error(res, new AuthorizationError());
+      if (err || +decoded.role !== 1) return Send.error(res, new AuthorizationError());
       try {
         req.user = await AuthService.findUserById(decoded.id);
-        next();
+        return next();
       } catch (error) {
         return Send.error(res, error);
       }

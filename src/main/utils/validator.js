@@ -10,6 +10,7 @@ class ReqValidator {
         errors.push(v.errors[key] && v.errors[key].message);
       }
       res.status(400).json({error: errors, status: 'error'});
+      return false;
     }
     return true;
   }

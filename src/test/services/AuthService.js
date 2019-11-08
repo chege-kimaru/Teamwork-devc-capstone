@@ -8,7 +8,7 @@ import db from '../../main/utils/db';
 const { expect, assert } = chai;
 
 const test = () => {
-  beforeEach(async () => {
+  before(async () => {
     await db.destroy();
     await db.initialize();
   });

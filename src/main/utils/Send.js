@@ -10,7 +10,7 @@ class Send {
   }
 
   static error(res, err) {
-    logger.error(err);
+    // logger.error(err);
     if (err instanceof errors.OperationNotAllowedError) {
       const errs = [];
       errs.push(err.message);

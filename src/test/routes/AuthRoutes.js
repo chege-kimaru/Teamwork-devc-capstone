@@ -9,13 +9,13 @@ chai.use(chatHttp);
 const { expect } = chai;
 
 const test = () => {
-  beforeEach(async () => {
-    await db.destroy();
-    await db.initialize();
-    await AuthService.initiateAdmin();
-  });
-
   describe('AuthRoutes', () => {
+    before(async () => {
+      await db.destroy();
+      await db.initialize();
+      await AuthService.initiateAdmin();
+    });
+
     it('should sign in a user with correct credentials', (done) => {
       const creds = {
         email: 'admin@teamwork.com',
@@ -67,7 +67,6 @@ const test = () => {
             password: '123456',
           };
           const { token } = res.body.data;
-          console.log(token);
 
           chai.request(app)
             .post('/api/v1/auth/change-password')
@@ -84,7 +83,7 @@ const test = () => {
     it('should not change the password for wrong current password set', (done) => {
       const creds = {
         email: 'admin@teamwork.com',
-        password: '1234',
+        password: '123456',
       };
       chai.request(app)
         .post('/api/v1/auth/signin')
