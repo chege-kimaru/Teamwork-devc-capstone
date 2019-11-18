@@ -51,6 +51,22 @@ class ArticleController {
     }
   }
 
+  static async createComment(req, res) {
+    try {
+      const valid = await ReqValidator.validate(req, res, {
+        comment: 'required'
+      });
+      if (!valid) return;
+      const data = {
+        comment: req.body.comment
+      };
+      const resData = await ArticleService.createComment(data, req.params.articleId, req.user.id);
+      Send.success(res, 201, resData);
+    } catch (err) {
+      Send.error(res, err);
+    }
+  }
+
   static async getEmployeeArticles(req, res) {
     try {
       const resData = await ArticleService.getEmployeeArticles(req.params.employeeId);

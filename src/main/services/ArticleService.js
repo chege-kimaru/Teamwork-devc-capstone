@@ -31,6 +31,21 @@ class ArticleService {
     }
   }
 
+  static async createComment(comment, articleId, employeeId) {
+    try {
+      const aQuery = 'SELECT id FROM articles WHERE id=$1';
+      const aRes = await pool.query(aQuery, [articleId]);
+      if (!aRes.rows || !aRes.rows[0] || !aRes.rows[0].id) throw new ResourceNotFoundError('This article does not exist');
+
+      const query = 'INSERT INTO articleComments (employeeId, articleId, commentm) VALUES ($1, $2, $3) RETURNING *';
+      const values = [employeeId, articleId, comment.comment];
+      const res = await pool.query(query, values);
+      return res.rows[0];
+    } catch (err) {
+      throw err;
+    }
+  }
+
   static async deleteArticle(articleId, employeeId) {
     try {
       const aQuery = 'SELECT id, employeeId FROM articles WHERE id=$1';

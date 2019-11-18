@@ -8,7 +8,7 @@ import EmployeeService from '../../main/services/EmployeeService';
 
 
 chai.use(chatHttp);
-const { expect } = chai;
+const {expect} = chai;
 
 const EMPLOYEE1_CREDS = {
   email: 'employee1@teamwork.com',
@@ -35,7 +35,7 @@ const test = () => {
         .set('Accept', 'application/json')
         .send(EMPLOYEE1_CREDS)
         .end((err, res) => {
-          const { token } = res.body.data;
+          const {token} = res.body.data;
           const article = {
             title: 'Test title',
             article: 'Test article',
@@ -70,7 +70,7 @@ const test = () => {
         .set('Accept', 'application/json')
         .send(EMPLOYEE1_CREDS)
         .end((err, res) => {
-          const { token } = res.body.data;
+          const {token} = res.body.data;
           const article = {
             title: 'Test title',
             article: 'Test article',
@@ -95,7 +95,7 @@ const test = () => {
         .set('Accept', 'application/json')
         .send(EMPLOYEE1_CREDS)
         .end((err, res) => {
-          const { token } = res.body.data;
+          const {token} = res.body.data;
           const article = {
             article: 'Test article',
             tags: 'test,tags',
@@ -137,7 +137,7 @@ const test = () => {
         .set('Accept', 'application/json')
         .send(EMPLOYEE1_CREDS)
         .end((err, res) => {
-          const { token } = res.body.data;
+          const {token} = res.body.data;
           chai.request(app)
             .get('/api/v1/articles/employee/2')
             .set('Accept', 'multipart/form-data')
@@ -157,7 +157,7 @@ const test = () => {
         .set('Accept', 'application/json')
         .send(EMPLOYEE1_CREDS)
         .end((err, res) => {
-          const { token } = res.body.data;
+          const {token} = res.body.data;
           const article = {
             title: 'Test title',
             article: 'Test article',
@@ -176,13 +176,52 @@ const test = () => {
         });
     });
 
+    it('Should only allow authorized employees to comment', (done) => {
+      const comment = {
+        comment: 'Nice'
+      };
+      chai.request(app)
+        .post('/api/v1/articles/2/comments')
+        .set('Accept', 'application/json')
+        .set('token', 'btbby.bywynb.btebye')
+        .send(comment)
+        .end((err2, res2) => {
+          expect(res2.status).to.equal(401);
+          expect(res2.body).to.haveOwnProperty('error');
+          done();
+        });
+    });
+
+    it('Should let an employee comment on another employee\'s article', (done) => {
+      chai.request(app)
+        .post('/api/v1/auth/signin')
+        .set('Accept', 'application/json')
+        .send(EMPLOYEE2_CREDS)
+        .end((err, res) => {
+          const {token} = res.body.data;
+          const comment = {
+            comment: 'Nice'
+          };
+          chai.request(app)
+            .post('/api/v1/articles/2/comments')
+            .set('Accept', 'application/json')
+            .set('token', token)
+            .send(comment)
+            .end((err2, res2) => {
+              expect(res2.status).to.equal(201);
+              expect(res2.body.data).to.haveOwnProperty('commentm');
+              done();
+            });
+        });
+    });
+
     it('Should only let owner of the article to update their article', (done) => {
       chai.request(app)
         .post('/api/v1/auth/signin')
         .set('Accept', 'application/json')
         .send(EMPLOYEE2_CREDS)
         .end((err, res) => {
-          const { token } = res.body.data;
+          const {token} = res.body.data;
           const article = {
             title: 'Test title',
             article: 'Test article',
@@ -208,7 +247,7 @@ const test = () => {
         .set('Accept', 'application/json')
         .send(EMPLOYEE2_CREDS)
         .end((err, res) => {
-          const { token } = res.body.data;
+          const {token} = res.body.data;
           chai.request(app)
             .delete('/api/v1/articles/1')
             .set('Accept', 'application/json')
@@ -228,7 +267,7 @@ const test = () => {
         .set('Accept', 'application/json')
         .send(EMPLOYEE1_CREDS)
         .end((err, res) => {
-          const { token } = res.body.data;
+          const {token} = res.body.data;
           chai.request(app)
             .delete('/api/v1/articles/1')
             .set('Accept', 'application/json')
