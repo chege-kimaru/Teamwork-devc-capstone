@@ -1,5 +1,5 @@
 import db from '../utils/db';
-import { ResourceNotFoundError } from '../utils/errors';
+import { ResourceNotFoundError, AuthorizationError } from '../utils/errors';
 
 const { pool } = db;
 
@@ -8,6 +8,22 @@ class ArticleService {
     try {
       const query = 'INSERT INTO articles (employeeId, title, article, tags) VALUES ($1, $2, $3, $4) RETURNING *';
       const values = [employeeId, article.title, article.article, article.tags];
+      const res = await pool.query(query, values);
+      return res.rows[0];
+    } catch (err) {
+      throw err;
+    }
+  }
+
+  static async updateArticle(article, articleId, employeeId) {
+    try {
+      const aQuery = 'SELECT id, employeeId FROM articles WHERE id=$1';
+      const aRes = await pool.query(aQuery, [articleId]);
+      if (!aRes.rows || !aRes.rows[0] || !aRes.rows[0].id) throw new ResourceNotFoundError('This article does not exist');
+      if (aRes.rows[0].employeeid !== employeeId) throw new AuthorizationError('You are not authorized to edit this article.');
+
+      const query = 'UPDATE articles SET title=$1, article=$2, tags=$3 RETURNING *';
+      const values = [article.title, article.article, article.tags];
       const res = await pool.query(query, values);
       return res.rows[0];
     } catch (err) {
