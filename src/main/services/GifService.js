@@ -15,6 +15,21 @@ class GifService {
     }
   }
 
+  static async createComment(comment, gifId, employeeId) {
+    try {
+      const aQuery = 'SELECT id FROM gifs WHERE id=$1';
+      const aRes = await pool.query(aQuery, [gifId]);
+      if (!aRes.rows || !aRes.rows[0] || !aRes.rows[0].id) throw new ResourceNotFoundError('This gif does not exist');
+
+      const query = 'INSERT INTO gifComments (employeeId, gifId, commentm) VALUES ($1, $2, $3) RETURNING *';
+      const values = [employeeId, gifId, comment.comment];
+      const res = await pool.query(query, values);
+      return res.rows[0];
+    } catch (err) {
+      throw err;
+    }
+  }
+
   static async deleteGif(gifId, employeeId) {
     try {
       const aQuery = 'SELECT id, employeeId FROM gifs WHERE id=$1';

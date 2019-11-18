@@ -4,8 +4,7 @@ import 'chai/register-should';
 import app from '../../main/app';
 import db from '../../main/utils/db';
 import AuthService from '../../main/services/AuthService';
-import GifService from '../../main/services/GifService';
-import EmployeeService from "../../main/services/EmployeeService";
+import EmployeeService from '../../main/services/EmployeeService';
 
 
 chai.use(chatHttp);
@@ -46,7 +45,18 @@ const test = () => {
             .end((err2, res2) => {
               expect(res2.status).to.equal(201);
               expect(res2.body.data).to.haveOwnProperty('imageurl');
-              done();
+
+              chai.request(app)
+                .post('/api/v1/gifs')
+                .set('Accept', 'multipart/form-data')
+                .set('token', token)
+                .field('title', 'balloons')
+                .attach('image', './testImage.jpg')
+                .end((err3, res3) => {
+                  expect(res3.status).to.equal(201);
+                  expect(res3.body.data).to.haveOwnProperty('imageurl');
+                  done();
+                });
             });
         });
     });
@@ -104,7 +114,46 @@ const test = () => {
         });
     });
 
-    it('Should only let owner of the gif to delete their article', (done) => {
+    it('Should only allow authorized employees to comment on a gif', (done) => {
+      const comment = {
+        comment: 'Nice',
+      };
+      chai.request(app)
+        .post('/api/v1/gifs/2/comments')
+        .set('Accept', 'application/json')
+        .set('token', 'btbby.bywynb.btebye')
+        .send(comment)
+        .end((err2, res2) => {
+          expect(res2.status).to.equal(401);
+          expect(res2.body).to.haveOwnProperty('error');
+          done();
+        });
+    });
+
+    it('Should let an employee comment on another employee\'s gif', (done) => {
+      chai.request(app)
+        .post('/api/v1/auth/signin')
+        .set('Accept', 'application/json')
+        .send(EMPLOYEE2_CREDS)
+        .end((err, res) => {
+          const { token } = res.body.data;
+          const comment = {
+            comment: 'Nice',
+          };
+          chai.request(app)
+            .post('/api/v1/gifs/2/comments')
+            .set('Accept', 'application/json')
+            .set('token', token)
+            .send(comment)
+            .end((err2, res2) => {
+              expect(res2.status).to.equal(201);
+              expect(res2.body.data).to.haveOwnProperty('commentm');
+              done();
+            });
+        });
+    });
+
+    it('Should only let owner of the gif to delete their gif', (done) => {
       chai.request(app)
         .post('/api/v1/auth/signin')
         .set('Accept', 'application/json')
@@ -141,7 +190,6 @@ const test = () => {
             });
         });
     });
-
   });
 };
 
