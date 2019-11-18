@@ -58,6 +58,18 @@ class GifService {
       throw err;
     }
   }
+
+  static async getGifs() {
+    try {
+      const query = 'SELECT g.*, CONCAT(e.firstName, \' \', e.lastName) AS author FROM gifs g, employees e WHERE g.employeeId=e.id ORDER BY createdAt DESC';
+      const resp = await pool.query(query);
+      return resp.rows;
+    } catch (err) {
+      throw err;
+    }
+  }
+
+
 }
 
 export default GifService;
