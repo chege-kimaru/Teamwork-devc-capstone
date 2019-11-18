@@ -42,6 +42,15 @@ class ArticleController {
     }
   }
 
+  static async deleteArticle(req, res) {
+    try {
+      const resData = await ArticleService.deleteArticle(req.params.articleId, req.user.id);
+      Send.success(res, 200, resData);
+    } catch (err) {
+      Send.error(res, err);
+    }
+  }
+
   static async getEmployeeArticles(req, res) {
     try {
       const resData = await ArticleService.getEmployeeArticles(req.params.employeeId);

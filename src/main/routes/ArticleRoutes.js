@@ -6,6 +6,7 @@ const router = Router();
 
 router.post('/', Middlewares.Auth, ArticleController.createArticle);
 router.put('/:articleId', Middlewares.Auth, ArticleController.updateArticle);
+router.delete('/:articleId', Middlewares.Auth, ArticleController.deleteArticle);
 router.get('/employee/:employeeId', Middlewares.Auth, ArticleController.getEmployeeArticles);
 
 export default router;

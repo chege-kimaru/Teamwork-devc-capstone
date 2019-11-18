@@ -49,6 +49,41 @@ const test = () => {
             .end((err2, res2) => {
               expect(res2.status).to.equal(201);
               expect(res2.body.data).to.haveOwnProperty('title');
+
+              chai.request(app)
+                .post('/api/v1/articles')
+                .set('Accept', 'application/json')
+                .set('token', token)
+                .send(article)
+                .end((err3, res3) => {
+                  expect(res3.status).to.equal(201);
+                  expect(res3.body.data).to.haveOwnProperty('title');
+                  done();
+                });
+            });
+        });
+    });
+
+    it('Should let employee create an article', (done) => {
+      chai.request(app)
+        .post('/api/v1/auth/signin')
+        .set('Accept', 'application/json')
+        .send(EMPLOYEE1_CREDS)
+        .end((err, res) => {
+          const { token } = res.body.data;
+          const article = {
+            title: 'Test title',
+            article: 'Test article',
+            tags: 'test,tags',
+          };
+          chai.request(app)
+            .post('/api/v1/articles')
+            .set('Accept', 'application/json')
+            .set('token', token)
+            .send(article)
+            .end((err2, res2) => {
+              expect(res2.status).to.equal(201);
+              expect(res2.body.data).to.haveOwnProperty('title');
               done();
             });
         });
@@ -116,7 +151,7 @@ const test = () => {
         });
     });
 
-    it('Should let employee update an article', (done) => {
+    it('Should let employee update their article', (done) => {
       chai.request(app)
         .post('/api/v1/auth/signin')
         .set('Accept', 'application/json')
@@ -141,7 +176,7 @@ const test = () => {
         });
     });
 
-    it('Should only let owner of the article to update the artcile', (done) => {
+    it('Should only let owner of the article to update their article', (done) => {
       chai.request(app)
         .post('/api/v1/auth/signin')
         .set('Accept', 'application/json')
@@ -162,6 +197,45 @@ const test = () => {
               expect(res2.status).to.equal(401);
               expect(res2.body).to.haveOwnProperty('error');
               expect(res2.body.error).to.equal('You are not authorized to edit this article.');
+              done();
+            });
+        });
+    });
+
+    it('Should only let owner of the article to delete their article', (done) => {
+      chai.request(app)
+        .post('/api/v1/auth/signin')
+        .set('Accept', 'application/json')
+        .send(EMPLOYEE2_CREDS)
+        .end((err, res) => {
+          const { token } = res.body.data;
+          chai.request(app)
+            .delete('/api/v1/articles/1')
+            .set('Accept', 'application/json')
+            .set('token', token)
+            .send(article)
+            .end((err2, res2) => {
+              expect(res2.status).to.equal(401);
+              expect(res2.body).to.haveOwnProperty('error');
+              expect(res2.body.error).to.equal('You are not authorized to delete this article.');
+              done();
+            });
+        });
+    });
+
+    it('Should let employee delete their article', (done) => {
+      chai.request(app)
+        .post('/api/v1/auth/signin')
+        .set('Accept', 'application/json')
+        .send(EMPLOYEE1_CREDS)
+        .end((err, res) => {
+          const { token } = res.body.data;
+          chai.request(app)
+            .delete('/api/v1/articles/1')
+            .set('Accept', 'application/json')
+            .set('token', token)
+            .end((err2, res2) => {
+              expect(res2.status).to.equal(200);
               done();
             });
         });
