@@ -1,6 +1,7 @@
 import GifService from '../services/GifService';
 import Send from '../utils/Send';
 import ReqValidator from '../utils/validator';
+import ArticleService from "../services/ArticleService";
 
 class GifController {
   static async createGif(req, res) {
@@ -16,6 +17,22 @@ class GifController {
         imageUrl: req.body.imageUrl,
       };
       const resData = await GifService.createGif(data, req.user.id);
+      Send.success(res, 201, resData);
+    } catch (err) {
+      Send.error(res, err);
+    }
+  }
+
+  static async createComment(req, res) {
+    try {
+      const valid = await ReqValidator.validate(req, res, {
+        comment: 'required'
+      });
+      if (!valid) return;
+      const data = {
+        comment: req.body.comment
+      };
+      const resData = await GifService.createComment(data, req.params.gifId, req.user.id);
       Send.success(res, 201, resData);
     } catch (err) {
       Send.error(res, err);
