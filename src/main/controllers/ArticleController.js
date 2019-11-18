@@ -36,7 +36,7 @@ class ArticleController {
         tags: req.body.tags,
       };
       const resData = await ArticleService.updateArticle(data, req.params.articleId, req.user.id);
-      Send.success(res, 201, resData);
+      Send.success(res, 200, resData);
     } catch (err) {
       Send.error(res, err);
     }
