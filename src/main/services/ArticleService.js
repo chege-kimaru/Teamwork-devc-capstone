@@ -22,8 +22,24 @@ class ArticleService {
       if (!aRes.rows || !aRes.rows[0] || !aRes.rows[0].id) throw new ResourceNotFoundError('This article does not exist');
       if (aRes.rows[0].employeeid !== employeeId) throw new AuthorizationError('You are not authorized to edit this article.');
 
-      const query = 'UPDATE articles SET title=$1, article=$2, tags=$3 RETURNING *';
-      const values = [article.title, article.article, article.tags];
+      const query = 'UPDATE articles SET title=$1, article=$2, tags=$3 WHERE id=$4 RETURNING *';
+      const values = [article.title, article.article, article.tags, articleId];
+      const res = await pool.query(query, values);
+      return res.rows[0];
+    } catch (err) {
+      throw err;
+    }
+  }
+
+  static async deleteArticle(articleId, employeeId) {
+    try {
+      const aQuery = 'SELECT id, employeeId FROM articles WHERE id=$1';
+      const aRes = await pool.query(aQuery, [articleId]);
+      if (!aRes.rows || !aRes.rows[0] || !aRes.rows[0].id) throw new ResourceNotFoundError('This article does not exist');
+      if (aRes.rows[0].employeeid !== employeeId) throw new AuthorizationError('You are not authorized to delete this article.');
+
+      const query = 'DELETE FROM articles WHERE id=$1';
+      const values = [articleId];
       const res = await pool.query(query, values);
       return res.rows[0];
     } catch (err) {
