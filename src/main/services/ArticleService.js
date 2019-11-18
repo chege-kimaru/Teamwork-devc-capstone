@@ -74,6 +74,16 @@ class ArticleService {
       throw err;
     }
   }
+
+  static async getArticles() {
+    try {
+      const query = 'SELECT a.*, CONCAT(e.firstName, \' \', e.lastName) AS author FROM articles a, employees e WHERE a.employeeId=e.id ORDER BY createdAt DESC';
+      const resp = await pool.query(query);
+      return resp.rows;
+    } catch (err) {
+      throw err;
+    }
+  }
 }
 
 export default ArticleService;
