@@ -1,5 +1,5 @@
 import db from '../utils/db';
-import { ResourceNotFoundError } from '../utils/errors';
+import {AuthorizationError, ResourceNotFoundError} from '../utils/errors';
 
 const { pool } = db;
 
@@ -8,6 +8,22 @@ class GifService {
     try {
       const query = 'INSERT INTO gifs (employeeId, title, imageUrl) VALUES ($1, $2, $3) RETURNING *';
       const values = [employeeId, gif.title, gif.imageUrl];
+      const res = await pool.query(query, values);
+      return res.rows[0];
+    } catch (err) {
+      throw err;
+    }
+  }
+
+  static async deleteGif(gifId, employeeId) {
+    try {
+      const aQuery = 'SELECT id, employeeId FROM gifs WHERE id=$1';
+      const aRes = await pool.query(aQuery, [gifId]);
+      if (!aRes.rows || !aRes.rows[0] || !aRes.rows[0].id) throw new ResourceNotFoundError('This gif does not exist');
+      if (aRes.rows[0].employeeid !== employeeId) throw new AuthorizationError('You are not authorized to delete this gif.');
+
+      const query = 'DELETE FROM gifs WHERE id=$1';
+      const values = [gifId];
       const res = await pool.query(query, values);
       return res.rows[0];
     } catch (err) {

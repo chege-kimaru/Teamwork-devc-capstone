@@ -213,7 +213,6 @@ const test = () => {
             .delete('/api/v1/articles/1')
             .set('Accept', 'application/json')
             .set('token', token)
-            .send(article)
             .end((err2, res2) => {
               expect(res2.status).to.equal(401);
               expect(res2.body).to.haveOwnProperty('error');

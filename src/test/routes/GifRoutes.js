@@ -103,6 +103,45 @@ const test = () => {
             });
         });
     });
+
+    it('Should only let owner of the gif to delete their article', (done) => {
+      chai.request(app)
+        .post('/api/v1/auth/signin')
+        .set('Accept', 'application/json')
+        .send(EMPLOYEE2_CREDS)
+        .end((err, res) => {
+          const { token } = res.body.data;
+          chai.request(app)
+            .delete('/api/v1/gifs/1')
+            .set('Accept', 'application/json')
+            .set('token', token)
+            .end((err2, res2) => {
+              expect(res2.status).to.equal(401);
+              expect(res2.body).to.haveOwnProperty('error');
+              expect(res2.body.error).to.equal('You are not authorized to delete this gif.');
+              done();
+            });
+        });
+    });
+
+    it('Should let employee delete their gif', (done) => {
+      chai.request(app)
+        .post('/api/v1/auth/signin')
+        .set('Accept', 'application/json')
+        .send(EMPLOYEE1_CREDS)
+        .end((err, res) => {
+          const { token } = res.body.data;
+          chai.request(app)
+            .delete('/api/v1/gifs/1')
+            .set('Accept', 'application/json')
+            .set('token', token)
+            .end((err2, res2) => {
+              expect(res2.status).to.equal(200);
+              done();
+            });
+        });
+    });
+
   });
 };
 
