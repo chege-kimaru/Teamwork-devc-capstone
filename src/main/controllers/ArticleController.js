@@ -23,6 +23,25 @@ class ArticleController {
     }
   }
 
+  static async updateArticle(req, res) {
+    try {
+      const valid = await ReqValidator.validate(req, res, {
+        title: 'required',
+        article: 'required',
+      });
+      if (!valid) return;
+      const data = {
+        title: req.body.title,
+        article: req.body.article,
+        tags: req.body.tags,
+      };
+      const resData = await ArticleService.updateArticle(data, req.params.articleId, req.user.id);
+      Send.success(res, 201, resData);
+    } catch (err) {
+      Send.error(res, err);
+    }
+  }
+
   static async getEmployeeArticles(req, res) {
     try {
       const resData = await ArticleService.getEmployeeArticles(req.params.employeeId);
