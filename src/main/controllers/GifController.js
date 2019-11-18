@@ -22,6 +22,15 @@ class GifController {
     }
   }
 
+  static async deleteGif(req, res) {
+    try {
+      const resData = await GifService.deleteGif(req.params.gifId, req.user.id);
+      Send.success(res, 200, resData);
+    } catch (err) {
+      Send.error(res, err);
+    }
+  }
+
   static async getEmployeeGifs(req, res) {
     try {
       const resData = await GifService.getEmployeeGifs(req.params.employeeId);
