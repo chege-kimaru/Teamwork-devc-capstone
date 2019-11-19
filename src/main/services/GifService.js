@@ -1,5 +1,5 @@
 import db from '../utils/db';
-import {AuthorizationError, ResourceNotFoundError} from '../utils/errors';
+import { AuthorizationError, OperationNotAllowedError, ResourceNotFoundError } from '../utils/errors';
 
 const { pool } = db;
 
@@ -17,7 +17,7 @@ class GifService {
 
   static async createComment(comment, gifId, employeeId) {
     try {
-      const aQuery = 'SELECT id FROM gifs WHERE id=$1';
+      const aQuery = 'SELECT id FROM gifs WHERE id=$1 AND status=1';
       const aRes = await pool.query(aQuery, [gifId]);
       if (!aRes.rows || !aRes.rows[0] || !aRes.rows[0].id) throw new ResourceNotFoundError('This gif does not exist');
 
@@ -39,7 +39,7 @@ class GifService {
    */
   static async inappropriateFlag(gifId, employeeId) {
     try {
-      const aQuery = 'SELECT id FROM gifs WHERE id=$1';
+      const aQuery = 'SELECT id FROM gifs WHERE id=$1 AND status=1';
       const aRes = await pool.query(aQuery, [gifId]);
       if (!aRes.rows || !aRes.rows[0] || !aRes.rows[0].id) throw new ResourceNotFoundError('This gif does not exist');
 
@@ -62,7 +62,7 @@ class GifService {
 
   static async commentInappropriateFlag(gifId, commentId, employeeId) {
     try {
-      const aQuery = 'SELECT id FROM gifComments WHERE id=$1 AND gifId=$2';
+      const aQuery = 'SELECT id FROM gifComments WHERE id=$1 AND gifId=$2 AND status=1';
       const aRes = await pool.query(aQuery, [commentId, gifId]);
       if (!aRes.rows || !aRes.rows[0] || !aRes.rows[0].id) throw new ResourceNotFoundError('This comment does not exist');
 
@@ -85,7 +85,7 @@ class GifService {
 
   static async deleteGif(gifId, employeeId) {
     try {
-      const aQuery = 'SELECT id, employeeId FROM gifs WHERE id=$1';
+      const aQuery = 'SELECT id, employeeId FROM gifs WHERE id=$1 and status=1';
       const aRes = await pool.query(aQuery, [gifId]);
       if (!aRes.rows || !aRes.rows[0] || !aRes.rows[0].id) throw new ResourceNotFoundError('This gif does not exist');
       if (aRes.rows[0].employeeid !== employeeId) throw new AuthorizationError('You are not authorized to delete this gif.');
@@ -99,14 +99,39 @@ class GifService {
     }
   }
 
-  static async getEmployeeGifs(employeeId) {
+  static async deleteInappropriateGif(gifId) {
     try {
-      const empQuery = 'SELECT id FROM employees WHERE id=$1';
-      const empRes = await pool.query(empQuery, [employeeId]);
-      if (!empRes.rows || !empRes.rows[0] || !empRes.rows[0].id) throw new ResourceNotFoundError('This employee does not exist');
-      const query = 'SELECT * FROM gifs where employeeId=$1 ORDER BY createdAt DESC';
-      const resp = await pool.query(query, [employeeId]);
-      return resp.rows;
+      const aQuery = 'SELECT id FROM gifs WHERE id=$1 and status=1';
+      const aRes = await pool.query(aQuery, [gifId]);
+      if (!aRes.rows || !aRes.rows[0] || !aRes.rows[0].id) throw new ResourceNotFoundError('This gif does not exist');
+
+      const fQuery = 'SELECT id FROM inappropriateFlags WHERE gifId=$1';
+      const fRes = await pool.query(fQuery, [gifId]);
+      if (!fRes.rows || !fRes.rows.length >= 1) throw new OperationNotAllowedError('This gif has not been marked as inappropriate');
+
+      const query = 'UPDATE gifs SET status=0, updatedAt=$1 WHERE id=$2 RETURNING *';
+      const values = [new Date(), gifId];
+      const res = await pool.query(query, values);
+      return res.rows[0];
+    } catch (err) {
+      throw err;
+    }
+  }
+
+  static async deleteInappropriateGifComment(gifId, commentId) {
+    try {
+      const aQuery = 'SELECT id FROM gifComments WHERE id=$1 AND gifId=$2 AND status=1';
+      const aRes = await pool.query(aQuery, [commentId, gifId]);
+      if (!aRes.rows || !aRes.rows[0] || !aRes.rows[0].id) throw new ResourceNotFoundError('This comment does not exist');
+
+      const fQuery = 'SELECT id FROM inappropriateFlags WHERE gifCommentId=$1';
+      const fRes = await pool.query(fQuery, [commentId]);
+      if (!fRes.rows || !fRes.rows.length >= 1) throw new OperationNotAllowedError('This comment has not been marked as inappropriate');
+
+      const query = 'UPDATE gifComments SET status=0, updatedAt=$1 WHERE id=$2 RETURNING *';
+      const values = [new Date(), commentId];
+      const res = await pool.query(query, values);
+      return res.rows[0];
     } catch (err) {
       throw err;
     }
@@ -114,7 +139,9 @@ class GifService {
 
   static async getGifs() {
     try {
-      const query = 'SELECT g.*, CONCAT(e.firstName, \' \', e.lastName) AS author FROM gifs g, employees e WHERE g.employeeId=e.id ORDER BY createdAt DESC';
+      const query = `SELECT g.*, CONCAT(e.firstName, ' ', e.lastName) AS author 
+                     FROM gifs g, employees e 
+                     WHERE g.employeeId=e.id AND status=1 ORDER BY createdAt DESC`;
       const resp = await pool.query(query);
       return resp.rows;
     } catch (err) {
@@ -124,14 +151,16 @@ class GifService {
 
   static async getGifById(gifId) {
     try {
-      const query = 'SELECT g.*, CONCAT(e.firstName, \' \', e.lastName) AS author, e.id AS authorid FROM gifs g, employees e WHERE g.employeeId=e.id AND g.id=$1';
+      const query = `SELECT g.*, CONCAT(e.firstName, ' ', e.lastName) AS author, e.id AS authorid 
+                    FROM gifs g, employees e 
+                    WHERE g.employeeId=e.id AND status=1 AND g.id=$1`;
       const resp = await pool.query(query, [gifId]);
       const gif = resp.rows[0];
 
-      if(!gif || !gif.id) throw new ResourceNotFoundError('This gif does not exist');
+      if (!gif || !gif.id) throw new ResourceNotFoundError('This gif does not exist');
 
-      const cquery = `SELECT * FROM gifComments WHERE gifId=$1 ORDER BY createdAt DESC`;
-      const cresp= await pool.query(cquery, [gifId]);
+      const cquery = 'SELECT * FROM gifComments WHERE gifId=$1 AND status=1 ORDER BY createdAt DESC';
+      const cresp = await pool.query(cquery, [gifId]);
       gif.comments = cresp.rows;
 
       return gif;
@@ -139,8 +168,6 @@ class GifService {
       throw err;
     }
   }
-
-
 }
 
 export default GifService;

@@ -66,9 +66,18 @@ class GifController {
     }
   }
 
-  static async getEmployeeGifs(req, res) {
+  static async deleteInappropriateGif(req, res) {
     try {
-      const resData = await GifService.getEmployeeGifs(req.params.employeeId);
+      const resData = await GifService.deleteInappropriateGif(req.params.gifId);
+      Send.success(res, 200, resData);
+    } catch (err) {
+      Send.error(res, err);
+    }
+  }
+
+  static async deleteInappropriateGifComment(req, res) {
+    try {
+      const resData = await GifService.deleteInappropriateGifComment(req.params.gifId, req.params.commentId);
       Send.success(res, 200, resData);
     } catch (err) {
       Send.error(res, err);
