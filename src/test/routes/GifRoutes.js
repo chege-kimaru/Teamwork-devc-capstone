@@ -176,6 +176,28 @@ const test = () => {
         });
     });
 
+    it('Should get gif by id and include its comments', (done) => {
+      chai.request(app)
+        .post('/api/v1/auth/signin')
+        .set('Accept', 'application/json')
+        .send(EMPLOYEE1_CREDS)
+        .end((err, res) => {
+          const {token} = res.body.data;
+          chai.request(app)
+            .get('/api/v1/gifs/2')
+            .set('token', token)
+            .end((err2, res2) => {
+              expect(res2.status).to.equal(200);
+              expect(res2.body.data).to.be.an('object');
+              expect(res2.body.data).to.haveOwnProperty('title');
+              expect(res2.body.data).to.haveOwnProperty('comments');
+              expect(res2.body.data.comments).to.be.an('array');
+              expect(res2.body.data.comments).to.have.length.greaterThan(0);
+              done();
+            });
+        });
+    });
+
     it('Should only let owner of the gif to delete their gif', (done) => {
       chai.request(app)
         .post('/api/v1/auth/signin')
