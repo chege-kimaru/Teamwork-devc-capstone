@@ -51,6 +51,24 @@ class ArticleController {
     }
   }
 
+  static async flagInappropriate(req, res) {
+    try {
+      const resData = await ArticleService.inappropriateFlag(req.params.articleId, req.user.id);
+      Send.success(res, 200, resData);
+    } catch (err) {
+      Send.error(res, err);
+    }
+  }
+
+  static async flagCommentInappropriate(req, res) {
+    try {
+      const resData = await ArticleService.commentInappropriateFlag(req.params.articleId, req.params.commentId, req.user.id);
+      Send.success(res, 200, resData);
+    } catch (err) {
+      Send.error(res, err);
+    }
+  }
+
   static async createComment(req, res) {
     try {
       const valid = await ReqValidator.validate(req, res, {
