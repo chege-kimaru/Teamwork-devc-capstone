@@ -56,6 +56,16 @@ class GifController {
       Send.error(res, err);
     }
   }
+
+  static async getGifs(req, res) {
+    try {
+      const resData = await GifService.getGifs();
+      Send.success(res, 200, resData);
+    } catch (err) {
+      Send.error(res, err);
+    }
+  }
+
 }
 
 export default GifController;

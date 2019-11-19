@@ -113,13 +113,12 @@ const test = () => {
         });
     });
 
-    const article = {
-      title: 'Test title',
-      article: 'Test article',
-      tags: 'test,tags',
-    };
-
     it('Should not allow an unauthenticated employee to create an article', (done) => {
+      const article = {
+        title: 'Test title',
+        article: 'Test article',
+        tags: 'test,tags',
+      };
       chai.request(app)
         .post('/api/v1/articles')
         .set('Accept', 'application/json')
@@ -146,6 +145,29 @@ const test = () => {
               expect(res2.status).to.equal(200);
               expect(res2.body.data).to.be.an('array');
               expect(res2.body.data[0]).to.haveOwnProperty('title');
+              done();
+            });
+        });
+    });
+
+    it('Should get all articles latest first', (done) => {
+      chai.request(app)
+        .post('/api/v1/auth/signin')
+        .set('Accept', 'application/json')
+        .send(EMPLOYEE1_CREDS)
+        .end((err, res) => {
+          const {token} = res.body.data;
+          chai.request(app)
+            .get('/api/v1/articles')
+            .set('token', token)
+            .end((err2, res2) => {
+              expect(res2.status).to.equal(200);
+              expect(res2.body.data).to.be.an('array');
+              expect(res2.body.data[0]).to.haveOwnProperty('title');
+              expect(res2.body.data[0]).to.haveOwnProperty('author');
+              const date1 = new Date(res2.body.data[0].createdat);
+              const date2 = new Date(res2.body.data[1].createdat);
+              expect(date1).to.be.greaterThan(date2);
               done();
             });
         });
