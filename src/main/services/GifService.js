@@ -69,6 +69,24 @@ class GifService {
     }
   }
 
+  static async getGifById(gifId) {
+    try {
+      const query = 'SELECT g.*, CONCAT(e.firstName, \' \', e.lastName) AS author, e.id AS authorid FROM gifs g, employees e WHERE g.employeeId=e.id AND g.id=$1';
+      const resp = await pool.query(query, [gifId]);
+      const gif = resp.rows[0];
+
+      if(!gif || !gif.id) throw new ResourceNotFoundError('This gif does not exist');
+
+      const cquery = `SELECT * FROM gifComments WHERE gifId=$1 ORDER BY createdAt DESC`;
+      const cresp= await pool.query(cquery, [gifId]);
+      gif.comments = cresp.rows;
+
+      return gif;
+    } catch (err) {
+      throw err;
+    }
+  }
+
 
 }
 

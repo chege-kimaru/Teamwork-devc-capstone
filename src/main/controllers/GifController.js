@@ -66,6 +66,15 @@ class GifController {
     }
   }
 
+  static async getGifById(req, res) {
+    try {
+      const resData = await GifService.getGifById(req.params.gifId);
+      Send.success(res, 200, resData);
+    } catch (err) {
+      Send.error(res, err);
+    }
+  }
+
 }
 
 export default GifController;
