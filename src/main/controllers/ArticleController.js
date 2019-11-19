@@ -75,6 +75,15 @@ class ArticleController {
       Send.error(res, err);
     }
   }
+
+  static async getArticles(req, res) {
+    try {
+      const resData = await ArticleService.getArticles();
+      Send.success(res, 200, resData);
+    } catch (err) {
+      Send.error(res, err);
+    }
+  }
 }
 
 export default ArticleController;
