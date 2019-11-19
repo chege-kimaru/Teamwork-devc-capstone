@@ -20,6 +20,11 @@ const EMPLOYEE2_CREDS = {
   password: '1234',
 };
 
+const ADMIN_CREDS = {
+  email: 'admin@teamwork.com',
+  password: '1234',
+};
+
 const test = () => {
   describe('GifRoutes', () => {
     before(async () => {
@@ -176,6 +181,10 @@ const test = () => {
         });
     });
 
+    /**
+     * TODO: only signed in employees can flag or unflag 1. comment or 2. article as inappropriate
+     */
+
     it('Should let an employee flag and unflag gif as inappropriate', (done) => {
       chai.request(app)
         .post('/api/v1/auth/signin')
@@ -184,7 +193,7 @@ const test = () => {
         .end((err, res) => {
           const {token} = res.body.data;
           chai.request(app)
-            .put('/api/v1/gifs/1/inappropriate')
+            .put('/api/v1/gifs/2/inappropriate')
             .set('Accept', 'application/json')
             .set('token', token)
             .send({})
@@ -193,14 +202,25 @@ const test = () => {
               expect(res2.body.data).to.equal(true);
 
               chai.request(app)
-                .put('/api/v1/gifs/1/inappropriate')
+                .put('/api/v1/gifs/2/inappropriate')
                 .set('Accept', 'application/json')
                 .set('token', token)
                 .send({})
                 .end((err3, res3) => {
                   expect(res3.status).to.equal(200);
                   expect(res3.body.data).to.equal(false);
-                  done();
+
+                  chai.request(app)
+                    .put('/api/v1/gifs/2/inappropriate')
+                    .set('Accept', 'application/json')
+                    .set('token', token)
+                    .send({})
+                    .end((err4, res4) => {
+                      expect(res4.status).to.equal(200);
+                      expect(res4.body.data).to.equal(true);
+                      done();
+                    });
+
                 });
             });
         });
@@ -230,7 +250,17 @@ const test = () => {
                 .end((err3, res3) => {
                   expect(res3.status).to.equal(200);
                   expect(res3.body.data).to.equal(false);
-                  done();
+
+                  chai.request(app)
+                    .put('/api/v1/gifs/2/comments/1/inappropriate')
+                    .set('Accept', 'application/json')
+                    .set('token', token)
+                    .send({})
+                    .end((err4, res4) => {
+                      expect(res4.status).to.equal(200);
+                      expect(res4.body.data).to.equal(true);
+                      done();
+                    });
                 });
             });
         });
@@ -253,6 +283,49 @@ const test = () => {
               expect(res2.body.data).to.haveOwnProperty('comments');
               expect(res2.body.data.comments).to.be.an('array');
               expect(res2.body.data.comments).to.have.length.greaterThan(0);
+              done();
+            });
+        });
+    });
+
+    /** TODO: delete 1. article, 2. article comment tests:
+     * 2. Non admin test
+     * 3. Non inappropriate test
+     * */
+
+    it('Should let an admin delete a gif flagged as inappropriate', (done) => {
+      chai.request(app)
+        .post('/api/v1/auth/signin')
+        .set('Accept', 'application/json')
+        .send(ADMIN_CREDS)
+        .end((err, res) => {
+          const {token} = res.body.data;
+          chai.request(app)
+            .delete('/api/v1/gifs/2/inappropriate')
+            .set('Accept', 'application/json')
+            .set('token', token)
+            .send({})
+            .end((err2, res2) => {
+              expect(res2.status).to.equal(200);
+              done();
+            });
+        });
+    });
+
+    it('Should let an admin delete a gif comment flagged as inappropriate', (done) => {
+      chai.request(app)
+        .post('/api/v1/auth/signin')
+        .set('Accept', 'application/json')
+        .send(ADMIN_CREDS)
+        .end((err, res) => {
+          const {token} = res.body.data;
+          chai.request(app)
+            .delete('/api/v1/gifs/2/comments/1/inappropriate')
+            .set('Accept', 'application/json')
+            .set('token', token)
+            .send({})
+            .end((err2, res2) => {
+              expect(res2.status).to.equal(200);
               done();
             });
         });
