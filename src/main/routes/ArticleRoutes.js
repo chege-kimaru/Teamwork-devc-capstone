@@ -10,7 +10,9 @@ router.put('/:articleId/inappropriate', Middlewares.Auth, ArticleController.flag
 router.put('/:articleId/comments/:commentId/inappropriate', Middlewares.Auth, ArticleController.flagCommentInappropriate);
 router.put('/:articleId', Middlewares.Auth, ArticleController.updateArticle);
 router.delete('/:articleId', Middlewares.Auth, ArticleController.deleteArticle);
-router.get('/employee/:employeeId', Middlewares.Auth, ArticleController.getEmployeeArticles);
+router.delete('/:articleId/inappropriate', Middlewares.adminAuth, ArticleController.deleteInappropriateArticle);
+router.delete('/:articleId/comments/:commentId/inappropriate',
+  Middlewares.adminAuth, ArticleController.deleteInappropriateArticleComment);
 router.get('/', Middlewares.Auth, ArticleController.getArticles);
 router.get('/:articleId', Middlewares.Auth, ArticleController.getArticleById);
 router.get('/tag/:tag', Middlewares.Auth, ArticleController.getArticlesByTag);

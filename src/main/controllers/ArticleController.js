@@ -51,6 +51,24 @@ class ArticleController {
     }
   }
 
+  static async deleteInappropriateArticle(req, res) {
+    try {
+      const resData = await ArticleService.deleteInappropriateArticle(req.params.articleId);
+      Send.success(res, 200, resData);
+    } catch (err) {
+      Send.error(res, err);
+    }
+  }
+
+  static async deleteInappropriateArticleComment(req, res) {
+    try {
+      const resData = await ArticleService.deleteInappropriateArticleComment(req.params.articleId, req.params.commentId);
+      Send.success(res, 200, resData);
+    } catch (err) {
+      Send.error(res, err);
+    }
+  }
+
   static async flagInappropriate(req, res) {
     try {
       const resData = await ArticleService.inappropriateFlag(req.params.articleId, req.user.id);
@@ -80,15 +98,6 @@ class ArticleController {
       };
       const resData = await ArticleService.createComment(data, req.params.articleId, req.user.id);
       Send.success(res, 201, resData);
-    } catch (err) {
-      Send.error(res, err);
-    }
-  }
-
-  static async getEmployeeArticles(req, res) {
-    try {
-      const resData = await ArticleService.getEmployeeArticles(req.params.employeeId);
-      Send.success(res, 200, resData);
     } catch (err) {
       Send.error(res, err);
     }

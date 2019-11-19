@@ -1,6 +1,8 @@
 import EmployeeService from '../services/EmployeeService';
 import Send from '../utils/Send';
 import ReqValidator from '../utils/validator';
+import ArticleService from '../services/ArticleService';
+import GifService from "../services/GifService";
 
 class EmployeeController {
   static async createEmployee(req, res) {
@@ -30,6 +32,25 @@ class EmployeeController {
       Send.error(res, err);
     }
   }
+
+  static async getEmployeeArticles(req, res) {
+    try {
+      const resData = await EmployeeService.getEmployeeArticles(req.params.employeeId);
+      Send.success(res, 200, resData);
+    } catch (err) {
+      Send.error(res, err);
+    }
+  }
+
+  static async getEmployeeGifs(req, res) {
+    try {
+      const resData = await EmployeeService.getEmployeeGifs(req.params.employeeId);
+      Send.success(res, 200, resData);
+    } catch (err) {
+      Send.error(res, err);
+    }
+  }
+
 }
 
 export default EmployeeController;
