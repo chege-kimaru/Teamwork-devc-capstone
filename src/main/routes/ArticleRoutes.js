@@ -13,7 +13,6 @@ router.delete('/:articleId', Middlewares.Auth, ArticleController.deleteArticle);
 router.delete('/:articleId/inappropriate', Middlewares.adminAuth, ArticleController.deleteInappropriateArticle);
 router.delete('/:articleId/comments/:commentId/inappropriate',
   Middlewares.adminAuth, ArticleController.deleteInappropriateArticleComment);
-router.get('/employee/:employeeId', Middlewares.Auth, ArticleController.getEmployeeArticles);
 router.get('/', Middlewares.Auth, ArticleController.getArticles);
 router.get('/:articleId', Middlewares.Auth, ArticleController.getArticleById);
 router.get('/tag/:tag', Middlewares.Auth, ArticleController.getArticlesByTag);

@@ -103,15 +103,6 @@ class ArticleController {
     }
   }
 
-  static async getEmployeeArticles(req, res) {
-    try {
-      const resData = await ArticleService.getEmployeeArticles(req.params.employeeId);
-      Send.success(res, 200, resData);
-    } catch (err) {
-      Send.error(res, err);
-    }
-  }
-
   static async getArticles(req, res) {
     try {
       const resData = await ArticleService.getArticles();

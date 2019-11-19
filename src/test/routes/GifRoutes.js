@@ -99,26 +99,6 @@ const test = () => {
         });
     });
 
-    it('Should get specific employees gifs', (done) => {
-      chai.request(app)
-        .post('/api/v1/auth/signin')
-        .set('Accept', 'application/json')
-        .send(EMPLOYEE1_CREDS)
-        .end((err, res) => {
-          const { token } = res.body.data;
-          chai.request(app)
-            .get('/api/v1/gifs/employee/2')
-            .set('Accept', 'multipart/form-data')
-            .set('token', token)
-            .end((err2, res2) => {
-              expect(res2.status).to.equal(200);
-              expect(res2.body.data).to.be.an('array');
-              expect(res2.body.data[0]).to.haveOwnProperty('imageurl');
-              done();
-            });
-        });
-    });
-
     it('Should get all gifs latest first', (done) => {
       chai.request(app)
         .post('/api/v1/auth/signin')

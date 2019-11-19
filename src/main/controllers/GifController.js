@@ -84,16 +84,6 @@ class GifController {
     }
   }
 
-
-  static async getEmployeeGifs(req, res) {
-    try {
-      const resData = await GifService.getEmployeeGifs(req.params.employeeId);
-      Send.success(res, 200, resData);
-    } catch (err) {
-      Send.error(res, err);
-    }
-  }
-
   static async getGifs(req, res) {
     try {
       const resData = await GifService.getGifs();

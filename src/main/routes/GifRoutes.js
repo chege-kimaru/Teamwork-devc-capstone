@@ -13,7 +13,6 @@ router.delete('/:gifId', Middlewares.Auth, GifController.deleteGif);
 router.delete('/:gifId/inappropriate', Middlewares.adminAuth, GifController.deleteInappropriateGif);
 router.delete('/:gifId/comments/:commentId/inappropriate',
   Middlewares.adminAuth, GifController.deleteInappropriateGifComment);
-router.get('/employee/:employeeId', Middlewares.Auth, GifController.getEmployeeGifs);
 router.get('/', Middlewares.Auth, GifController.getGifs);
 router.get('/:gifId', Middlewares.Auth, GifController.getGifById);
 

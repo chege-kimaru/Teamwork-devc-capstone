@@ -106,6 +106,43 @@ const test = () => {
             });
         });
     });
+
+    it('Should get specific employees articles', (done) => {
+      chai.request(app)
+        .post('/api/v1/auth/signin')
+        .set('Accept', 'application/json')
+        .send(EMPLOYEE1_CREDS)
+        .end((err, res) => {
+          const { token } = res.body.data;
+          chai.request(app)
+            .get('/api/v1/employees/2/articles')
+            .set('token', token)
+            .end((err2, res2) => {
+              expect(res2.status).to.equal(200);
+              expect(res2.body.data).to.be.an('array');
+              done();
+            });
+        });
+    });
+
+    it('Should get specific employees gifs', (done) => {
+      chai.request(app)
+        .post('/api/v1/auth/signin')
+        .set('Accept', 'application/json')
+        .send(EMPLOYEE1_CREDS)
+        .end((err, res) => {
+          const { token } = res.body.data;
+          chai.request(app)
+            .get('/api/v1/employees/2/gifs')
+            .set('Accept', 'application/json')
+            .set('token', token)
+            .end((err2, res2) => {
+              expect(res2.status).to.equal(200);
+              expect(res2.body.data).to.be.an('array');
+              done();
+            });
+        });
+    });
   });
 };
 
