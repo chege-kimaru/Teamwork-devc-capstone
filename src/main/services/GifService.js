@@ -1,5 +1,5 @@
 import db from '../utils/db';
-import {AuthorizationError, ResourceNotFoundError} from '../utils/errors';
+import {AuthorizationError, OperationNotAllowedError, ResourceNotFoundError} from '../utils/errors';
 
 const { pool } = db;
 
@@ -92,6 +92,44 @@ class GifService {
 
       const query = 'DELETE FROM gifs WHERE id=$1';
       const values = [gifId];
+      const res = await pool.query(query, values);
+      return res.rows[0];
+    } catch (err) {
+      throw err;
+    }
+  }
+
+  static async deleteInappropriateGif(gifId) {
+    try {
+      const aQuery = 'SELECT id FROM gifs WHERE id=$1';
+      const aRes = await pool.query(aQuery, [gifId]);
+      if (!aRes.rows || !aRes.rows[0] || !aRes.rows[0].id) throw new ResourceNotFoundError('This gif does not exist');
+
+      const fQuery = 'SELECT id FROM inappropriateFlags WHERE gifId=$1';
+      const fRes = await pool.query(fQuery, [gifId]);
+      if (!fRes.rows || !fRes.rows.length >= 1) throw new OperationNotAllowedError('This gif has not been marked as inappropriate');
+
+      const query = 'UPDATE gifs SET status=0 WHERE id=$1 RETURNING *';
+      const values = [gifId];
+      const res = await pool.query(query, values);
+      return res.rows[0];
+    } catch (err) {
+      throw err;
+    }
+  }
+
+  static async deleteInappropriateGifComment(gifId, commentId) {
+    try {
+      const aQuery = 'SELECT id FROM gifComments WHERE id=$1 AND gifId=$2';
+      const aRes = await pool.query(aQuery, [commentId, gifId]);
+      if (!aRes.rows || !aRes.rows[0] || !aRes.rows[0].id) throw new ResourceNotFoundError('This comment does not exist');
+
+      const fQuery = 'SELECT id FROM inappropriateFlags WHERE gifCommentId=$1';
+      const fRes = await pool.query(fQuery, [commentId]);
+      if (!fRes.rows || !fRes.rows.length >= 1) throw new OperationNotAllowedError('This comment has not been marked as inappropriate');
+
+      const query = 'UPDATE gifComments SET status=0 WHERE id=$1 RETURNING *';
+      const values = [commentId];
       const res = await pool.query(query, values);
       return res.rows[0];
     } catch (err) {

@@ -123,7 +123,7 @@ class ArticleService {
 
       const fQuery = 'SELECT id FROM inappropriateFlags WHERE articleId=$1';
       const fRes = await pool.query(fQuery, [articleId]);
-      if (!fRes.rows || !fRes.rows.length >= 1) throw new OperationNotAllowedError('This article has not been marked as deleted');
+      if (!fRes.rows || !fRes.rows.length >= 1) throw new OperationNotAllowedError('This article has not been marked as inappropriate');
 
       const query = 'UPDATE articles SET status=0 WHERE id=$1 RETURNING *';
       const values = [articleId];
@@ -142,7 +142,7 @@ class ArticleService {
 
       const fQuery = 'SELECT id FROM inappropriateFlags WHERE articleCommentId=$1';
       const fRes = await pool.query(fQuery, [commentId]);
-      if (!fRes.rows || !fRes.rows.length >= 1) throw new OperationNotAllowedError('This comment has not been marked as deleted');
+      if (!fRes.rows || !fRes.rows.length >= 1) throw new OperationNotAllowedError('This comment has not been marked as inappropriate');
 
       const query = 'UPDATE articleComments SET status=0 WHERE id=$1 RETURNING *';
       const values = [commentId];
