@@ -109,8 +109,8 @@ class GifService {
       const fRes = await pool.query(fQuery, [gifId]);
       if (!fRes.rows || !fRes.rows.length >= 1) throw new OperationNotAllowedError('This gif has not been marked as inappropriate');
 
-      const query = 'UPDATE gifs SET status=0 WHERE id=$1 RETURNING *';
-      const values = [gifId];
+      const query = 'UPDATE gifs SET status=0, updatedAt=$1 WHERE id=$2 RETURNING *';
+      const values = [new Date(), gifId];
       const res = await pool.query(query, values);
       return res.rows[0];
     } catch (err) {
@@ -128,8 +128,8 @@ class GifService {
       const fRes = await pool.query(fQuery, [commentId]);
       if (!fRes.rows || !fRes.rows.length >= 1) throw new OperationNotAllowedError('This comment has not been marked as inappropriate');
 
-      const query = 'UPDATE gifComments SET status=0 WHERE id=$1 RETURNING *';
-      const values = [commentId];
+      const query = 'UPDATE gifComments SET status=0, updatedAt=$1 WHERE id=$2 RETURNING *';
+      const values = [new Date(), commentId];
       const res = await pool.query(query, values);
       return res.rows[0];
     } catch (err) {

@@ -22,8 +22,8 @@ class ArticleService {
       if (!aRes.rows || !aRes.rows[0] || !aRes.rows[0].id) throw new ResourceNotFoundError('This article does not exist');
       if (aRes.rows[0].employeeid !== employeeId) throw new AuthorizationError('You are not authorized to edit this article.');
 
-      const query = 'UPDATE articles SET title=$1, article=$2, tags=$3 WHERE id=$4 RETURNING *';
-      const values = [article.title, article.article, article.tags, articleId];
+      const query = 'UPDATE articles SET title=$1, article=$2, tags=$3, updatedAt=$4 WHERE id=$5 RETURNING *';
+      const values = [article.title, article.article, article.tags, new Date(), articleId];
       const res = await pool.query(query, values);
       return res.rows[0];
     } catch (err) {
@@ -125,8 +125,8 @@ class ArticleService {
       const fRes = await pool.query(fQuery, [articleId]);
       if (!fRes.rows || !fRes.rows.length >= 1) throw new OperationNotAllowedError('This article has not been marked as inappropriate');
 
-      const query = 'UPDATE articles SET status=0 WHERE id=$1 RETURNING *';
-      const values = [articleId];
+      const query = 'UPDATE articles SET status=0, updatedAt=$1 WHERE id=$2 RETURNING *';
+      const values = [new Date(), articleId];
       const res = await pool.query(query, values);
       return res.rows[0];
     } catch (err) {
@@ -144,8 +144,8 @@ class ArticleService {
       const fRes = await pool.query(fQuery, [commentId]);
       if (!fRes.rows || !fRes.rows.length >= 1) throw new OperationNotAllowedError('This comment has not been marked as inappropriate');
 
-      const query = 'UPDATE articleComments SET status=0 WHERE id=$1 RETURNING *';
-      const values = [commentId];
+      const query = 'UPDATE articleComments SET status=0, updatedAt=$1 WHERE id=$2 RETURNING *';
+      const values = [new Date(), commentId];
       const res = await pool.query(query, values);
       return res.rows[0];
     } catch (err) {
