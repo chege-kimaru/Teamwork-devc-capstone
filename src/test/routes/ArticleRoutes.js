@@ -173,6 +173,44 @@ const test = () => {
         });
     });
 
+    it('Should get all articles by a tag name', (done) => {
+      chai.request(app)
+        .post('/api/v1/auth/signin')
+        .set('Accept', 'application/json')
+        .send(EMPLOYEE1_CREDS)
+        .end((err, res) => {
+          const {token} = res.body.data;
+          chai.request(app)
+            .get('/api/v1/articles/tag/test')
+            .set('token', token)
+            .end((err2, res2) => {
+              expect(res2.status).to.equal(200);
+              expect(res2.body.data).to.be.an('array');
+              expect(res2.body.data).length.to.be.greaterThan(0);
+              done();
+            });
+        });
+    });
+
+    it('Should return empty array if no articles by that tag', (done) => {
+      chai.request(app)
+        .post('/api/v1/auth/signin')
+        .set('Accept', 'application/json')
+        .send(EMPLOYEE1_CREDS)
+        .end((err, res) => {
+          const {token} = res.body.data;
+          chai.request(app)
+            .get('/api/v1/articles/tag/hey')
+            .set('token', token)
+            .end((err2, res2) => {
+              expect(res2.status).to.equal(200);
+              expect(res2.body.data).to.be.an('array');
+              expect(res2.body.data).to.have.length(0);
+              done();
+            });
+        });
+    });
+
     it('Should let employee update their article', (done) => {
       chai.request(app)
         .post('/api/v1/auth/signin')
