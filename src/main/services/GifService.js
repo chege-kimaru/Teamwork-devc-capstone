@@ -30,6 +30,59 @@ class GifService {
     }
   }
 
+  /**
+   *
+   * @param gifId
+   * @param employeeId
+   * @returns {Promise<boolean>}
+   * Toggle inappropriate flag
+   */
+  static async inappropriateFlag(gifId, employeeId) {
+    try {
+      const aQuery = 'SELECT id FROM gifs WHERE id=$1';
+      const aRes = await pool.query(aQuery, [gifId]);
+      if (!aRes.rows || !aRes.rows[0] || !aRes.rows[0].id) throw new ResourceNotFoundError('This gif does not exist');
+
+      const fQuery = 'SELECT id FROM inappropriateFlags WHERE gifId=$1 AND employeeId=$2';
+      const fRes = await pool.query(fQuery, [gifId, employeeId]);
+      if (fRes.rows && fRes.rows[0] && fRes.rows[0].id) {
+        const dQuery = 'DELETE FROM inappropriateFlags WHERE gifId=$1 AND employeeId=$2';
+        await pool.query(dQuery, [gifId, employeeId]);
+        return false;
+      }
+
+      const query = 'INSERT INTO inappropriateFlags (gifId, employeeId) VALUES ($1, $2) RETURNING *';
+      const values = [gifId, employeeId];
+      await pool.query(query, values);
+      return true;
+    } catch (err) {
+      throw err;
+    }
+  }
+
+  static async commentInappropriateFlag(gifId, commentId, employeeId) {
+    try {
+      const aQuery = 'SELECT id FROM gifComments WHERE id=$1 AND gifId=$2';
+      const aRes = await pool.query(aQuery, [commentId, gifId]);
+      if (!aRes.rows || !aRes.rows[0] || !aRes.rows[0].id) throw new ResourceNotFoundError('This comment does not exist');
+
+      const fQuery = 'SELECT id FROM inappropriateFlags WHERE gifCommentId=$1 AND employeeId=$2';
+      const fRes = await pool.query(fQuery, [commentId, employeeId]);
+      if (fRes.rows && fRes.rows[0] && fRes.rows[0].id) {
+        const dQuery = 'DELETE FROM inappropriateFlags WHERE gifCommentId=$1 AND employeeId=$2';
+        await pool.query(dQuery, [commentId, employeeId]);
+        return false;
+      }
+
+      const query = 'INSERT INTO inappropriateFlags (gifCommentId, employeeId) VALUES ($1, $2) RETURNING *';
+      const values = [commentId, employeeId];
+      await pool.query(query, values);
+      return true;
+    } catch (err) {
+      throw err;
+    }
+  }
+
   static async deleteGif(gifId, employeeId) {
     try {
       const aQuery = 'SELECT id, employeeId FROM gifs WHERE id=$1';

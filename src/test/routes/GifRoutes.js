@@ -176,6 +176,66 @@ const test = () => {
         });
     });
 
+    it('Should let an employee flag and unflag gif as inappropriate', (done) => {
+      chai.request(app)
+        .post('/api/v1/auth/signin')
+        .set('Accept', 'application/json')
+        .send(EMPLOYEE2_CREDS)
+        .end((err, res) => {
+          const {token} = res.body.data;
+          chai.request(app)
+            .put('/api/v1/gifs/1/inappropriate')
+            .set('Accept', 'application/json')
+            .set('token', token)
+            .send({})
+            .end((err2, res2) => {
+              expect(res2.status).to.equal(200);
+              expect(res2.body.data).to.equal(true);
+
+              chai.request(app)
+                .put('/api/v1/gifs/1/inappropriate')
+                .set('Accept', 'application/json')
+                .set('token', token)
+                .send({})
+                .end((err3, res3) => {
+                  expect(res3.status).to.equal(200);
+                  expect(res3.body.data).to.equal(false);
+                  done();
+                });
+            });
+        });
+    });
+
+    it('Should let an employee flag and unflag gif comment as inappropriate', (done) => {
+      chai.request(app)
+        .post('/api/v1/auth/signin')
+        .set('Accept', 'application/json')
+        .send(EMPLOYEE2_CREDS)
+        .end((err, res) => {
+          const {token} = res.body.data;
+          chai.request(app)
+            .put('/api/v1/gifs/2/comments/1/inappropriate')
+            .set('Accept', 'application/json')
+            .set('token', token)
+            .send({})
+            .end((err2, res2) => {
+              expect(res2.status).to.equal(200);
+              expect(res2.body.data).to.equal(true);
+
+              chai.request(app)
+                .put('/api/v1/gifs/2/comments/1/inappropriate')
+                .set('Accept', 'application/json')
+                .set('token', token)
+                .send({})
+                .end((err3, res3) => {
+                  expect(res3.status).to.equal(200);
+                  expect(res3.body.data).to.equal(false);
+                  done();
+                });
+            });
+        });
+    });
+
     it('Should get gif by id and include its comments', (done) => {
       chai.request(app)
         .post('/api/v1/auth/signin')

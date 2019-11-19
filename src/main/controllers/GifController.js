@@ -48,6 +48,24 @@ class GifController {
     }
   }
 
+  static async flagInappropriate(req, res) {
+    try {
+      const resData = await GifService.inappropriateFlag(req.params.gifId, req.user.id);
+      Send.success(res, 200, resData);
+    } catch (err) {
+      Send.error(res, err);
+    }
+  }
+
+  static async flagCommentInappropriate(req, res) {
+    try {
+      const resData = await GifService.commentInappropriateFlag(req.params.gifId, req.params.commentId, req.user.id);
+      Send.success(res, 200, resData);
+    } catch (err) {
+      Send.error(res, err);
+    }
+  }
+
   static async getEmployeeGifs(req, res) {
     try {
       const resData = await GifService.getEmployeeGifs(req.params.employeeId);

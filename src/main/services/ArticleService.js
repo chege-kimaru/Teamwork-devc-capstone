@@ -31,6 +31,59 @@ class ArticleService {
     }
   }
 
+  /**
+   *
+   * @param articleId
+   * @param employeeId
+   * @returns {Promise<boolean>}
+   * Toggle inappropriate flag
+   */
+  static async inappropriateFlag(articleId, employeeId) {
+    try {
+      const aQuery = 'SELECT id FROM articles WHERE id=$1';
+      const aRes = await pool.query(aQuery, [articleId]);
+      if (!aRes.rows || !aRes.rows[0] || !aRes.rows[0].id) throw new ResourceNotFoundError('This article does not exist');
+
+      const fQuery = 'SELECT id FROM inappropriateFlags WHERE articleId=$1 AND employeeId=$2';
+      const fRes = await pool.query(fQuery, [articleId, employeeId]);
+      if (fRes.rows && fRes.rows[0] && fRes.rows[0].id) {
+        const dQuery = 'DELETE FROM inappropriateFlags WHERE articleId=$1 AND employeeId=$2';
+        await pool.query(dQuery, [articleId, employeeId]);
+        return false;
+      }
+
+      const query = 'INSERT INTO inappropriateFlags (articleId, employeeId) VALUES ($1, $2) RETURNING *';
+      const values = [articleId, employeeId];
+      await pool.query(query, values);
+      return true;
+    } catch (err) {
+      throw err;
+    }
+  }
+
+  static async commentInappropriateFlag(articleId, commentId, employeeId) {
+    try {
+      const aQuery = 'SELECT id FROM articleComments WHERE id=$1 AND articleId=$2';
+      const aRes = await pool.query(aQuery, [commentId, articleId]);
+      if (!aRes.rows || !aRes.rows[0] || !aRes.rows[0].id) throw new ResourceNotFoundError('This comment does not exist');
+
+      const fQuery = 'SELECT id FROM inappropriateFlags WHERE articleCommentId=$1 AND employeeId=$2';
+      const fRes = await pool.query(fQuery, [commentId, employeeId]);
+      if (fRes.rows && fRes.rows[0] && fRes.rows[0].id) {
+        const dQuery = 'DELETE FROM inappropriateFlags WHERE articleCommentId=$1 AND employeeId=$2';
+        await pool.query(dQuery, [commentId, employeeId]);
+        return false;
+      }
+
+      const query = 'INSERT INTO inappropriateFlags (articleCommentId, employeeId) VALUES ($1, $2) RETURNING *';
+      const values = [commentId, employeeId];
+      await pool.query(query, values);
+      return true;
+    } catch (err) {
+      throw err;
+    }
+  }
+
   static async createComment(comment, articleId, employeeId) {
     try {
       const aQuery = 'SELECT id FROM articles WHERE id=$1';
