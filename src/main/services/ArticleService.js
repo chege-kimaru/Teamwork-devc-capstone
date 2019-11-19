@@ -84,6 +84,24 @@ class ArticleService {
       throw err;
     }
   }
+
+  static async getArticleById(articleId) {
+    try {
+      const query = 'SELECT a.*, CONCAT(e.firstName, \' \', e.lastName) AS author, e.id AS authorid FROM articles a, employees e WHERE a.employeeId=e.id AND a.id=$1';
+      const resp = await pool.query(query, [articleId]);
+      const article = resp.rows[0];
+
+      if(!article || !article.id) throw new ResourceNotFoundError('This article does not exist');
+
+      const cquery = `SELECT * FROM articleComments WHERE articleId=$1 ORDER BY createdAt DESC`;
+      const cresp= await pool.query(cquery, [articleId]);
+      article.comments = cresp.rows;
+
+      return article;
+    } catch (err) {
+      throw err;
+    }
+  }
 }
 
 export default ArticleService;
