@@ -17,7 +17,7 @@ class ArticleService {
 
   static async updateArticle(article, articleId, employeeId) {
     try {
-      const aQuery = 'SELECT id, employeeId FROM articles WHERE id=$1';
+      const aQuery = 'SELECT id, employeeId FROM articles WHERE id=$1 AND status=1';
       const aRes = await pool.query(aQuery, [articleId]);
       if (!aRes.rows || !aRes.rows[0] || !aRes.rows[0].id) throw new ResourceNotFoundError('This article does not exist');
       if (aRes.rows[0].employeeid !== employeeId) throw new AuthorizationError('You are not authorized to edit this article.');
@@ -40,7 +40,7 @@ class ArticleService {
    */
   static async inappropriateFlag(articleId, employeeId) {
     try {
-      const aQuery = 'SELECT id FROM articles WHERE id=$1';
+      const aQuery = 'SELECT id FROM articles WHERE id=$1 AND status=1';
       const aRes = await pool.query(aQuery, [articleId]);
       if (!aRes.rows || !aRes.rows[0] || !aRes.rows[0].id) throw new ResourceNotFoundError('This article does not exist');
 
@@ -63,7 +63,7 @@ class ArticleService {
 
   static async commentInappropriateFlag(articleId, commentId, employeeId) {
     try {
-      const aQuery = 'SELECT id FROM articleComments WHERE id=$1 AND articleId=$2';
+      const aQuery = 'SELECT id FROM articleComments WHERE id=$1 AND articleId=$2 AND status=1';
       const aRes = await pool.query(aQuery, [commentId, articleId]);
       if (!aRes.rows || !aRes.rows[0] || !aRes.rows[0].id) throw new ResourceNotFoundError('This comment does not exist');
 
@@ -86,7 +86,7 @@ class ArticleService {
 
   static async createComment(comment, articleId, employeeId) {
     try {
-      const aQuery = 'SELECT id FROM articles WHERE id=$1';
+      const aQuery = 'SELECT id FROM articles WHERE id=$1 AND status=1';
       const aRes = await pool.query(aQuery, [articleId]);
       if (!aRes.rows || !aRes.rows[0] || !aRes.rows[0].id) throw new ResourceNotFoundError('This article does not exist');
 
@@ -101,7 +101,7 @@ class ArticleService {
 
   static async deleteArticle(articleId, employeeId) {
     try {
-      const aQuery = 'SELECT id, employeeId FROM articles WHERE id=$1';
+      const aQuery = 'SELECT id, employeeId FROM articles WHERE id=$1 AND status=1';
       const aRes = await pool.query(aQuery, [articleId]);
       if (!aRes.rows || !aRes.rows[0] || !aRes.rows[0].id) throw new ResourceNotFoundError('This article does not exist');
       if (aRes.rows[0].employeeid !== employeeId) throw new AuthorizationError('You are not authorized to delete this article.');
@@ -117,7 +117,7 @@ class ArticleService {
 
   static async deleteInappropriateArticle(articleId) {
     try {
-      const aQuery = 'SELECT id FROM articles WHERE id=$1';
+      const aQuery = 'SELECT id FROM articles WHERE id=$1 AND status=1';
       const aRes = await pool.query(aQuery, [articleId]);
       if (!aRes.rows || !aRes.rows[0] || !aRes.rows[0].id) throw new ResourceNotFoundError('This article does not exist');
 
@@ -136,7 +136,7 @@ class ArticleService {
 
   static async deleteInappropriateArticleComment(articleId, commentId) {
     try {
-      const aQuery = 'SELECT id FROM articleComments WHERE id=$1 AND articleId=$2';
+      const aQuery = 'SELECT id FROM articleComments WHERE id=$1 AND articleId=$2 AND status=1';
       const aRes = await pool.query(aQuery, [commentId, articleId]);
       if (!aRes.rows || !aRes.rows[0] || !aRes.rows[0].id) throw new ResourceNotFoundError('This comment does not exist');
 
@@ -158,7 +158,7 @@ class ArticleService {
       const empQuery = 'SELECT id FROM employees WHERE id=$1';
       const empRes = await pool.query(empQuery, [employeeId]);
       if (!empRes.rows || !empRes.rows[0] || !empRes.rows[0].id) throw new ResourceNotFoundError('This employee does not exist');
-      const query = 'SELECT * FROM articles where employeeId=$1 ORDER BY createdAt DESC';
+      const query = 'SELECT * FROM articles where employeeId=$1 AND status=1 ORDER BY createdAt DESC';
       const resp = await pool.query(query, [employeeId]);
       return resp.rows;
     } catch (err) {
@@ -168,7 +168,10 @@ class ArticleService {
 
   static async getArticles() {
     try {
-      const query = 'SELECT a.*, CONCAT(e.firstName, \' \', e.lastName) AS author FROM articles a, employees e WHERE a.employeeId=e.id ORDER BY createdAt DESC';
+      const query = `SELECT a.*, CONCAT(e.firstName, \' \', e.lastName) AS author 
+                    FROM articles a, employees e 
+                    WHERE a.employeeId=e.id AND status=1
+                    ORDER BY createdAt DESC`;
       const resp = await pool.query(query);
       return resp.rows;
     } catch (err) {
@@ -180,7 +183,7 @@ class ArticleService {
     try {
       const query = `SELECT a.*, CONCAT(e.firstName, ' ', e.lastName) AS author 
                      FROM articles a, employees e
-                     WHERE a.employeeId=e.id 
+                     WHERE a.employeeId=e.id  AND status=1
                      AND tags LIKE $1 OR tags LIKE $2 OR tags LIKE $3 
                      ORDER BY createdAt DESC`;
       const resp = await pool.query(query, [`%,${tag}`, `${tag},%`, `%,${tag},%`]);
@@ -192,13 +195,15 @@ class ArticleService {
 
   static async getArticleById(articleId) {
     try {
-      const query = 'SELECT a.*, CONCAT(e.firstName, \' \', e.lastName) AS author, e.id AS authorid FROM articles a, employees e WHERE a.employeeId=e.id AND a.id=$1';
+      const query = `SELECT a.*, CONCAT(e.firstName, \' \', e.lastName) AS author, e.id AS authorid 
+                    FROM articles a, employees e 
+                    WHERE a.employeeId=e.id AND a.id=$1 AND status=1`;
       const resp = await pool.query(query, [articleId]);
       const article = resp.rows[0];
 
       if (!article || !article.id) throw new ResourceNotFoundError('This article does not exist');
 
-      const cquery = 'SELECT * FROM articleComments WHERE articleId=$1 ORDER BY createdAt DESC';
+      const cquery = 'SELECT * FROM articleComments WHERE articleId=$1 AND status=1 ORDER BY createdAt DESC';
       const cresp = await pool.query(cquery, [articleId]);
       article.comments = cresp.rows;
 
