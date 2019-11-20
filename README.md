@@ -2,6 +2,8 @@
 Teamwork is an internal social network for employees of an organization. The goal of this
 application is to facilitate more interaction between colleagues and promote team bonding.
 
+#### [Documentation](https://documenter.getpostman.com/view/2175639/SW7aXTFX?version=latest)
+
 #### Initialize environment
 - Configure `.env` from `.env_`
 - Initialize environment and database:
@@ -18,3 +20,4 @@ npm run test
 ```shell script 
 npm run dev
 ```
+
