@@ -43,7 +43,7 @@
   },
   "scripts": {
     "initialize": "npx babel-node ./src/main/initialize.js",
-    "start": "npx babel-node ./src/main/index.js",
+    "start": "node ./build/main/index.js",
     "dev": "nodemon --exec babel-node ./src/main/index.js",
     "test": "nyc --require @babel/register  mocha ./src/test/index.js --timeout 120000 --exit",
     "build": "rm -rf ./build && babel -d ./build ./src -s",
